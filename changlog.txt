@@ -1,0 +1,10 @@
+# ---------------------------------- CHANGELOG ------------------------------------- #
+# Versão atual: 1.0
+# ================================================================================== #
+
+# ---------- 1.0 [16/08/2025]
+- Criado estrutura inicial de arquivos que serão utilizados no projeto.
+- Desenvolvido pipe_compass.py que será o sistema de aplicativo de console.
+- Desenvolvido código inicial extract_api.py com orientação a objetos.
+
+
