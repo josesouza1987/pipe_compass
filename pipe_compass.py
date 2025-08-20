@@ -9,14 +9,14 @@
 
 # ========== Variáveis de Identificação =========
 nome = 'pipe_compass'
-versao = '1.0'
-data = '2025-08-16'
+versao = '1.1'
+data = '2025-08-20'
 
 # ========== Importações ============
 import sys
 import src.py.extract_api as uptAPI
 
-# Ao digitar somente o comando "python %pipe%" sem uasr argumentos exibe texto descritivo com as opçoes
+# Ao digitar somente o comando "python %pipe%" sem usar argumentos exibe texto descritivo com as opçoes
 if len(sys.argv) < 2:
 
     print("\n======pipe_compass - Pipeline de Dados========")
@@ -27,27 +27,28 @@ if len(sys.argv) < 2:
     print("Uso:")
     print("  python pipe_compass.py -[opção] [extra]\n")
     
-    print("Opções disponíveis:")
-    print("  -r api1    : Atualizar dados da API 1")
-    print("  -r api2    : Atualizar dados da API 2")
+    print("Opções:")
+    print("  -u updateselic       Atualizar dados bruto da taxa selic do Banco do Brasil")
+    print("  -u updatedolar       Atualizar dados bruto do valor do Dolar")
     
     print("\nExemplo de execução:")
-    print("  python %pipe% -r api1")
+    print("  python %pipe% -u updateselic")
     print("==============================================")
 
-    exit(0)
+    exit(0) # Pra encessar a execução do console
 
-if sys.argv[1] == '-r':
+# Se o primeiro argumento após %pipe% for '-u'
+if sys.argv[1] == '-u':
     
-    #---- Acessa função da API 1 ------
-    if sys.argv [2] == 'api1':
+    #---- Atualiza dados da taxa de selic do Banco do Brasil" ------
+    if sys.argv [2] == 'updateselic':
         upg = uptAPI.extractAPI()
-        upg.updateAPI1()
+        upg.updateSelic()
 
-    #---- Acessa função da API 2 ------
-    if sys.argv [2] == 'api2':
+    #---- Atualiza base de dados de Dolar ------
+    if sys.argv [2] == 'updatedolar':
         upg = uptAPI.extractAPI()
-        upg.updateAPI2()
+        upg.updateDolar()
 
 else:
     print('Opção ' + sys.argv[1] + ' não encontrado.')
