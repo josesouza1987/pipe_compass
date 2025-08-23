@@ -30,12 +30,14 @@ Este arquivo possui a documentação do sistema de pipeline de estudo da Fast Tr
 │
 └─── output                                         : Todos arquivos de bases de dados exportadas
     │   curado                                      : Pasta contendo arquivos de base de dados com alto nível de tratamento prontos para uso
-    └───dados_bruto                                 : Pasta contendo arquivos de base de dados brutos com nenhuma ou poucas transformações
+    │   dados_bruto                                 : Pasta contendo arquivos de base de dados brutos com nenhuma ou poucas transformações
+    └───logs                                        : Pasta contendo arquivo com logs
+        └───logs_pipelie.csv                        : Arquivo de logs de sucesso e erros da execução do programa
 │
 └─── reports                                        : Pasta que contém relatórios de analise dos dados
         └─── Analise Financeira.pbix                : Arquivo de relatório do Power BI com indicadores do projeto
 │
-└─── tests                                          : Notebooks utilizados pra testes os quais não são relevantes para o fucnionamento do programa
+└─── tests                                          : Notebooks utilizados pra testes os quais não são relevantes para o funcionamento do programa
 ```
 
 # Requisitos
@@ -70,13 +72,14 @@ As etapas pra configurá-lo são:
 1. Abra o **Menu Iniciar** e procure por **Agendador de Tarefas**.
 
 2. Clique com o botão direito em **Biblioteca do Agendador de Tarefas** e depois em **Criar Tarefa**.
-
+```
 Exemplo de configuração, Nome e Disparadores poderão serem alteradas conforme régra de negócio mas Ações deve seguir conforme abaixo.
 Nome: atualizaPipeCompass 
 Disparadores: Todos os dias às 07:00.
 Ações:
     Programa/Script: escreva o caminho completo do arquvio pythonw.exe (fica localizado na pasta da instalação do python)
     Argumentos: %pipe% -u updategeral
+```
 
 # Publicando uma nova versão
 Sempre que for desenvolver alguma nova função ou correção de erros, é necessário criar uma nova branch no repositório para tal.  
@@ -88,7 +91,9 @@ Abra um terminal do sistema operacional e digite python %pipe%
 Siga as instruções que aparecerão no terminal.
 
 # Informações sobre as APIs utilizadas no projeto
-A escolha dessas fontes de dados 
+A escolha de fontes de dados públicas do Banco Central para obter dados atualizados da taxa Selic e da cotação do dólar, as duas enriquece um acompanhamento de variações de juros e câmbio do dólar.
+
+Regras de conexão: havendo erro na conexão de cada API se repetirá a cada 10 segundos em até 5 tentativas gerando logs de erro.
 
 1. API taxa de juros Selic:
 Objetivo: Obter os valores diários da taxa Selic, que é a taxa básica de juros da economia brasileira.

@@ -8,6 +8,10 @@ import pandas as pd
 import requests as rq
 from datetime import datetime as dt
 from datetime import timedelta
+import time
+import sys
+from .func_aux import funcAux
+aux = funcAux()
 
 class extractAPI():
     def __init__(self):
@@ -15,18 +19,11 @@ class extractAPI():
         self.dataInicial=dt.strftime(dt.today() - timedelta(days=365), '%Y-%m-%d')
         self.dataFinal=dt.now().strftime('%Y-%m-%d')
 
-    def saveParquet(self, df, pasta):
-        # Loop por ano e mês, no final vai salvar na estrutura de pastas /ano/mes por exemplo: /2025/08
-        for (year, month), group in df.groupby(['year', 'month']):
-            # Pasta do ano com formato year-YYYY
-            year_path = os.path.join(pasta, f'year-{year}')
-            os.makedirs(year_path, exist_ok=True)
-            
-            # Caminho do arquivo: month-MM.parquet
-            file_path = os.path.join(year_path, f'month-{month:02d}.parquet')
-            
-            # Salvar Parquet removendo coluna index do dataframe
-            group.drop(['year', 'month'], axis=1).to_parquet(file_path, engine='pyarrow', index=False)
+        # Caminho da pasta de log, se não existe cria uma e variaveis de número de tentativas e tempo
+        self.log_arquivo = os.getenv('output') + 'logs/logs_pipeline.csv'
+        os.makedirs(os.path.dirname(self.log_arquivo), exist_ok=True)
+        self.tentativas = 5
+        self.tempo=10 # em segundos
 
     def updateSelic(self, dataInicial=None, dataFinal=None):
         # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
@@ -43,45 +40,63 @@ class extractAPI():
         url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados'
         params = {'dataInicial': dataInicial,'dataFinal': dataFinal}
 
-        res = rq.get(url, params=params, timeout=30)
-        res.raise_for_status()
-        dados = res.json()
+        # Realiza a checagem se a resposta da API é 200 com sucesso se não faz 5 tentativas a cada 10 segundos
+        # Também realiza o salvamento de mensagens de log em caso de erro
+        for i in range(1, self.tentativas + 1):
+            res = rq.get(url, params=params, timeout=30)
+            if res.status_code == 200:
+                break
+            else:
+                aux.log('Erro', 'API Selic do BCB na tentativa ' + str(i) + ' falhou com erro: ' + str(res.status_code))
+                time.sleep(self.tempo)
+                if i == 5:
+                    sys.exit(1) # fecha o código imediatamente
 
-        df = pd.DataFrame(dados)
+        # Gera um log se ocorrer erro na transformação dos dados
+        try:
+            dados = res.json()
 
-        # Transforma o campo data pra padrão americano yyyy-mm-dd
-        df["data"] = pd.to_datetime(df["data"], dayfirst=True) # parâmetro dayfirst=True diz que o formato da data está no padrão brasileiro (dd/mm/yyyy)
+            df = pd.DataFrame(dados)
 
-        # Transformando o valor para para tipo float
-        df["taxa_diaria_percentual"] = df["valor"].astype(float)
+            # Transforma o campo data pra padrão americano yyyy-mm-dd
+            df["data"] = pd.to_datetime(df["data"], dayfirst=True) # parâmetro dayfirst=True diz que o formato da data está no padrão brasileiro (dd/mm/yyyy)
 
-        # Realizando a multiplicação de 252 (dias de negociação) para dados relacionados ao mercado conforme a fonte https://www.investopedia.com/terms/a/annualize.asp
-        # Nesse primeiro comando estou dividindo por 100 pra realizar o calculo de exponenciações
-        df["taxa_diaria_decimal"] = df["taxa_diaria_percentual"] / 100.0
+            # Transformando o valor para para tipo float
+            df["taxa_diaria_percentual"] = df["valor"].astype(float)
 
-        # Anualização por 252 dias úteis conforme a documentação da fonte
-        df["taxa_selic"] = ((1 + df["taxa_diaria_decimal"]) ** 252 - 1) * 100
+            # Realizando a multiplicação de 252 (dias de negociação) para dados relacionados ao mercado conforme a fonte https://www.investopedia.com/terms/a/annualize.asp
+            # Nesse primeiro comando estou dividindo por 100 pra realizar o calculo de exponenciações
+            df["taxa_diaria_decimal"] = df["taxa_diaria_percentual"] / 100.0
 
-        # Selecionando somente as colunas data e taxa_selic
-        df = df[['data', 'taxa_selic']]
+            # Anualização por 252 dias úteis conforme a documentação da fonte
+            df["taxa_selic"] = ((1 + df["taxa_diaria_decimal"]) ** 252 - 1) * 100
 
-        # Criar colunas de ano e mês pra separar por arquivos e pastas
-        df['year'] = df['data'].dt.year
-        df['month'] = df['data'].dt.month
-        
-        # Criando o caminho da pasta base pra salvar arquivos
-        pasta =  os.getenv('output') + 'dados_bruto/taxa_selic'
+            # Selecionando somente as colunas data e taxa_selic
+            df = df[['data', 'taxa_selic']]
 
-        # Renomeia a coluna "data" para "date" pra pradronizar
-        df = df.rename(columns={"data": "date"})
+            # Criar colunas de ano e mês pra separar por arquivos e pastas
+            df['year'] = df['data'].dt.year
+            df['month'] = df['data'].dt.month
+            
+            # Criando o caminho da pasta base pra salvar arquivos
+            pasta =  os.getenv('output') + 'dados_bruto/taxa_selic'
 
-        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
-        self.saveParquet(df, pasta)
+            # Renomeia a coluna "data" para "date" pra pradronizar
+            df = df.rename(columns={"data": "date"})
 
-        print('Concluída a atualização dos dados da taxa Selic de ' + dataInicial + ' até ' + dataFinal)
+            # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
+            aux.saveParquet(df, pasta)
 
-        # Retorna o dataframe com resultado dessa função
-        return df
+            # Gera log em caso de sucesso
+            aux.log('Sucesso', 'Concluída a atualização dos dados da taxa Selic de ' + dataInicial + ' até ' + dataFinal)
+
+            # Retorna o dataframe com resultado dessa função
+            return df
+            
+        # Se ocorrer erro nos tratamentos dos dados gera log de erro e finalza programa
+        except Exception as erro:
+                    aux.log('Erro', 'API Selic do BCB falhou no tratamento de dados com erro: ' + str(erro))
+                    exit(0) # Pra encessar a execução do console
 
     def updateDolar(self, dataInicial=None, dataFinal=None):
         # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
@@ -89,70 +104,100 @@ class extractAPI():
             dataInicial = self.dataInicial
         if dataFinal is None:
             dataFinal = self.dataFinal
-        
-        # Definindo parâmetros da API
-        url = 'https://api.exchangerate.host/timeframe'
 
         # Lendo a variavel de ambiente com chave de acesso à API
         key = os.getenv('exchangerate_key')
 
-        # Definindo parâmetros com intervalo de 365 dias.
+        # Definindo parâmetros da API
+        url = 'https://api.exchangerate.host/timeframe'
         params = {'access_key': key,  'start_date': dataInicial, 'end_date': dataFinal, 'source': 'USD', 'currencies': 'BRL'}
+        
+        # Realiza a checagem se a resposta da API é 200 com sucesso se não faz 5 tentativas a cada 10 segundos
+        # Também realiza o salvamento de mensagens de log em caso de erro
+        for i in range(1, self.tentativas + 1):
+            res = rq.get(url, params=params, timeout=30)
+            if res.status_code == 200:
+                break
+            else:
+                aux.log('Erro', 'API de cotação do dolar do exchangerate.host ' + str(i) + ' falhou com erro: ' + str(res.status_code))
+                time.sleep(self.tempo)
+                if i == 5:
+                    sys.exit(1) # fecha o código imediatamente
 
         # Faz a requisição da API e transforma em dicionário
-        res = rq.get(url, params=params)
-        res_dict = res.json()
-
-        # Criando uma lista de dicionários onde .items() retorna pares de chave e valor do dicionário
-        # Sendo a coluna date recebe a chave e USDBRL recebe o valor que está dentro do dicionário
-        # Usando o loop for pra percorrer cada item do dicionário res_dict['quotes']
-        list_dict = [{'date': date, 'USDBRL': value['USDBRL']} for date, value in res_dict['quotes'].items()]
-
-        # Transforma em Dataframe do pandas
-        df = pd.DataFrame(list_dict)
-
-        # Converter a coluna de data para datetime
-        df['date'] = pd.to_datetime(df['date'])
-
-        # Criar colunas de ano e mês pra separar por arquivos e pastas
-        df['year'] = df['date'].dt.year
-        df['month'] = df['date'].dt.month
         
-        # Criando o caminho da pasta base pra salvar arquivos
-        pasta =  os.getenv('output') + 'dados_bruto/cotacao_dolar'
+        # Gera um log se ocorrer erro na transformação dos dados
+        try:
 
-        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
-        self.saveParquet(df, pasta)
+            res_dict = res.json()
 
-        print('Concluída a atualização dos dados de cotação do dolar de ' + dataInicial + ' até ' + dataFinal)
+            # Criando uma lista de dicionários onde .items() retorna pares de chave e valor do dicionário
+            # Sendo a coluna date recebe a chave e USDBRL recebe o valor que está dentro do dicionário
+            # Usando o loop for pra percorrer cada item do dicionário res_dict['quotes']
+            list_dict = [{'date': date, 'USDBRL': value['USDBRL']} for date, value in res_dict['quotes'].items()]
 
-        # Retorna o dataframe com resultado dessa função
-        return df
+            # Transforma em Dataframe do pandas
+            df = pd.DataFrame(list_dict)
+
+            # Converter a coluna de data para datetime
+            df['date'] = pd.to_datetime(df['date'])
+
+            # Criar colunas de ano e mês pra separar por arquivos e pastas
+            df['year'] = df['date'].dt.year
+            df['month'] = df['date'].dt.month
+            
+            # Criando o caminho da pasta base pra salvar arquivos
+            pasta =  os.getenv('output') + 'dados_bruto/cotacao_dolar'
+
+            # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
+            aux.saveParquet(df, pasta)
+
+            # Gera log em caso de sucesso
+            aux.log('Sucesso', 'Concluída a atualização dos dados de cotação do dolar de ' + dataInicial + ' até ' + dataFinal)
+
+            # Retorna o dataframe com resultado dessa função
+            return df
+        # Se ocorrer erro nos tratamentos dos dados gera log de erro e finalza programa
+        except Exception as erro:
+                    aux.log('Erro', 'API de cotação do dolar do exchangerate.host falhou no tratamento de dados com erro: ' + str(erro))
+                    exit(0) # Pra encessar a execução do console
     
     def dadosCurados(self, dataInicial=None, dataFinal=None):
-        # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
-        if dataInicial is None:
-            dataInicial = self.dataInicial
-        if dataFinal is None:
-            dataFinal = self.dataFinal
+        # Gera um log se ocorrer erro na transformação dos dados
+        try:
+            # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
+            if dataInicial is None:
+                dataInicial = self.dataInicial
+            if dataFinal is None:
+                dataFinal = self.dataFinal
 
-        df_selic = self.updateSelic(dataInicial, dataFinal)
-        df_dolar = self.updateDolar(dataInicial, dataFinal)
+            df_selic = self.updateSelic(dataInicial, dataFinal)
+            df_dolar = self.updateDolar(dataInicial, dataFinal)
 
-        # Faz o merge pela coluna "date" e mantendo todas as datas
-        df_final = pd.merge(df_dolar, df_selic, on="date", how="outer")
+            # Faz o merge pela coluna "date" e mantendo todas as datas
+            df_final = pd.merge(df_dolar, df_selic, on="date", how="outer")
 
-        # Selecionando somente as colunas necessárias até o momento
-        df_final = df_final[['date','USDBRL', 'taxa_selic']]
+            # Selecionando somente as colunas necessárias até o momento
+            df_final = df_final[['date','USDBRL', 'taxa_selic']]
 
-        # Recriando as colunas de ano e mês
-        df_final['year'] = df_final['date'].dt.year
-        df_final['month'] = df_final['date'].dt.month
+            # Recriando as colunas de ano e mês
+            df_final['year'] = df_final['date'].dt.year
+            df_final['month'] = df_final['date'].dt.month
 
-        # Criando o caminho da pasta base pra salvar arquivos
-        pasta =  os.getenv('output') + 'curado/dados_financeiros'
+            # Criando o caminho da pasta base pra salvar arquivos
+            pasta =  os.getenv('output') + 'curado/dados_financeiros'
 
-        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
-        self.saveParquet(df_final, pasta)
+            # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
+            aux.saveParquet(df_final, pasta)
 
-        print('Concluída a atualização das bases bruto e curado')
+            # Gera log em caso de sucesso
+            aux.log('Sucesso', 'Concluída a atualização das bases bruto e curado')
+
+            return df_final
+        
+        # Se ocorrer erro nos tratamentos dos dados gera log de erro e finalza programa
+        except Exception as erro:
+                aux.log('Erro', 'Tratamento dos dados curados falhou com erro ' + str(erro))
+                exit(0) # Pra encessar a execução do console
+            
+
