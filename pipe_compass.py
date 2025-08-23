@@ -4,13 +4,13 @@
 #
 # ==================== ARGs =======================
 # Exemplo de uso:
-#   python %pipe% -r 
+#   python %pipe%
 #==================================================
 
 # ========== Variáveis de Identificação =========
 nome = 'pipe_compass'
-versao = '1.1'
-data = '2025-08-20'
+versao = '1.2'
+data = '2025-08-22'
 
 # ========== Importações ============
 import sys
@@ -25,14 +25,19 @@ if len(sys.argv) < 2:
     print("==============================================\n")
 
     print("Uso:")
-    print("  python pipe_compass.py -[opção] [extra]\n")
+    print("  python pipe_compass.py -[opção] [extra1] [extra1]\n")
     
     print("Opções:")
-    print("  -u updateselic       Atualizar dados bruto da taxa selic do Banco do Brasil")
-    print("  -u updatedolar       Atualizar dados bruto do valor do Dolar")
-    
+    print("  -u updategeral        Atualizar todos os dados brutos e curados")
+    print("  -u updateselic        Atualizar dados bruto da taxa selic do Banco do Brasil")
+    print("  -u updatedolar        Atualizar dados bruto do valor do Dolar")    
+
     print("\nExemplo de execução:")
-    print("  python %pipe% -u updateselic")
+    print("  python %pipe% -u updadegeral")
+
+    print("\nExemplo de execução especificando datas de início e fim no formato [aaaa-mm-dd]:")
+    print("  python %pipe% -u updadegeral 2025-01-01 2025-12-31")
+
     print("==============================================")
 
     exit(0) # Pra encessar a execução do console
@@ -40,15 +45,29 @@ if len(sys.argv) < 2:
 # Se o primeiro argumento após %pipe% for '-u'
 if sys.argv[1] == '-u':
     
+    #---- Atualiza todas bases de dados ------
+    if sys.argv [2] == 'updategeral':
+        upd = uptAPI.extractAPI()
+        if len(sys.argv) == 5: # Checa se teve mais dois argumentos
+            upd.dadosCurados(sys.argv[3], sys.argv[4])
+        else:
+            upd.dadosCurados()
+            
     #---- Atualiza dados da taxa de selic do Banco do Brasil" ------
     if sys.argv [2] == 'updateselic':
-        upg = uptAPI.extractAPI()
-        upg.updateSelic()
+        upd = uptAPI.extractAPI()
+        if len(sys.argv) == 5: # Checa se teve mais dois argumentos
+            upd.updateSelic(sys.argv[3], sys.argv[4])
+        else:
+            upd.updateSelic()
 
     #---- Atualiza base de dados de Dolar ------
     if sys.argv [2] == 'updatedolar':
-        upg = uptAPI.extractAPI()
-        upg.updateDolar()
+        upd = uptAPI.extractAPI()
+        if len(sys.argv) == 5: # Checa se teve mais dois argumentos
+            upd.updateDolar(sys.argv[3], sys.argv[4])
+        else:
+            upd.updateDolar()
 
 else:
     print('Opção ' + sys.argv[1] + ' não encontrado.')

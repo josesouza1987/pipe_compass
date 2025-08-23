@@ -1,17 +1,19 @@
+#==================================================
+# TÍTULO: extract_api.py
+# DESCRIÇÃO: Nesse arquivo serão realizadas as chamadas de APIs que serão extraídas e transformadas.
+#==================================================
+
 import os
 import pandas as pd
 import requests as rq
 from datetime import datetime as dt
 from datetime import timedelta
 
-#==================================================
-# TÍTULO: extract_api.py
-# DESCRIÇÃO: Nesse arquivo serão realizadas as chamadas de APIs que serão extraídas e transformadas.
-#==================================================
-
 class extractAPI():
     def __init__(self):
-        pass
+        # Declarando variáveis de data pra reutilizar
+        self.dataInicial=dt.strftime(dt.today() - timedelta(days=365), '%Y-%m-%d')
+        self.dataFinal=dt.now().strftime('%Y-%m-%d')
 
     def saveParquet(self, df, pasta):
         # Loop por ano e mês, no final vai salvar na estrutura de pastas /ano/mes por exemplo: /2025/08
@@ -26,7 +28,17 @@ class extractAPI():
             # Salvar Parquet removendo coluna index do dataframe
             group.drop(['year', 'month'], axis=1).to_parquet(file_path, engine='pyarrow', index=False)
 
-    def updateSelic(self, dataInicial=dt.strftime(dt.today() - timedelta(days=365), r'%d/%m/%Y'), dataFinal=dt.now().strftime('%d/%m/%Y')):
+    def updateSelic(self, dataInicial=None, dataFinal=None):
+        # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
+        if dataInicial is None:
+            dataInicial = self.dataInicial
+        if dataFinal is None:
+            dataFinal = self.dataFinal
+
+        # Converte datas para o padrão brasileiro da API
+        dataInicial = dt.strptime(dataInicial, '%Y-%m-%d').strftime('%d/%m/%Y')
+        dataFinal = dt.strptime(dataFinal, '%Y-%m-%d').strftime('%d/%m/%Y')
+
         # Definindo parâmetros da API
         url = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados'
         params = {'dataInicial': dataInicial,'dataFinal': dataFinal}
@@ -60,15 +72,24 @@ class extractAPI():
         # Criando o caminho da pasta base pra salvar arquivos
         pasta =  os.getenv('output') + 'dados_bruto/taxa_selic'
 
-        # chama a função com resultado do dataframe pra gerar os arquivos em parquet
+        # Renomeia a coluna "data" para "date" pra pradronizar
+        df = df.rename(columns={"data": "date"})
+
+        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
         self.saveParquet(df, pasta)
 
-        print('Concluída a atualização dos dados da taxa Selic de ' + dataInicial + " até " + dataFinal)
+        print('Concluída a atualização dos dados da taxa Selic de ' + dataInicial + ' até ' + dataFinal)
 
         # Retorna o dataframe com resultado dessa função
         return df
 
-    def updateDolar(self, dataInicial=dt.strftime(dt.today() - timedelta(days=365), r'%Y-%m-%d'), dataFinal=dt.now().strftime('%Y-%m-%d')):
+    def updateDolar(self, dataInicial=None, dataFinal=None):
+        # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
+        if dataInicial is None:
+            dataInicial = self.dataInicial
+        if dataFinal is None:
+            dataFinal = self.dataFinal
+        
         # Definindo parâmetros da API
         url = 'https://api.exchangerate.host/timeframe'
 
@@ -100,12 +121,38 @@ class extractAPI():
         # Criando o caminho da pasta base pra salvar arquivos
         pasta =  os.getenv('output') + 'dados_bruto/cotacao_dolar'
 
-        # chama a função com resultado do dataframe pra gerar os arquivos em parquet
+        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
         self.saveParquet(df, pasta)
 
-        print('Concluída a atualização dos dados de cotação do dolar de ' + dataInicial + " até " + dataFinal)
+        print('Concluída a atualização dos dados de cotação do dolar de ' + dataInicial + ' até ' + dataFinal)
 
         # Retorna o dataframe com resultado dessa função
         return df
     
-    
+    def dadosCurados(self, dataInicial=None, dataFinal=None):
+        # Caso não seja informado parâmetro de data será carregado a que foi definida na função __init___
+        if dataInicial is None:
+            dataInicial = self.dataInicial
+        if dataFinal is None:
+            dataFinal = self.dataFinal
+
+        df_selic = self.updateSelic(dataInicial, dataFinal)
+        df_dolar = self.updateDolar(dataInicial, dataFinal)
+
+        # Faz o merge pela coluna "date" e mantendo todas as datas
+        df_final = pd.merge(df_dolar, df_selic, on="date", how="outer")
+
+        # Selecionando somente as colunas necessárias até o momento
+        df_final = df_final[['date','USDBRL', 'taxa_selic']]
+
+        # Recriando as colunas de ano e mês
+        df_final['year'] = df_final['date'].dt.year
+        df_final['month'] = df_final['date'].dt.month
+
+        # Criando o caminho da pasta base pra salvar arquivos
+        pasta =  os.getenv('output') + 'curado/dados_financeiros'
+
+        # Chama a função com resultado do dataframe pra gerar os arquivos em parquet
+        self.saveParquet(df_final, pasta)
+
+        print('Concluída a atualização das bases bruto e curado')

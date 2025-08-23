@@ -1,6 +1,12 @@
 # ---------------------------------- CHANGELOG ------------------------------------- #
-# Versão atual: 1.1
+# Versão atual: 1.2
 # ================================================================================== #
+
+# ---------- 1.2 [22/08/2025]
+- Desenvolvdo função de faz as transformações em dados curados e realiza persistência dos dados em formato parquet
+- Criado notebook com relatório de data quality das duas APIs
+- Criado relatório Power BI
+- Atualização da documentação
 
 # ---------- 1.1 [20/08/2025]
 - Realizado a criação das funções de taxa selic e dolar que conectam e fazem as transformações necessárias pra salvamento bruto dos dados
