@@ -1,0 +1,46 @@
+status,mensagem,data_hora
+Erro,Tentativa 1 falhou com erro: 404,2025-08-23 13:56:25
+Erro,Tentativa 2 falhou com erro: 404,2025-08-23 13:56:27
+Erro,Tentativa 3 falhou com erro: 404,2025-08-23 13:56:28
+Erro,Tentativa 4 falhou com erro: 404,2025-08-23 13:56:29
+Erro,Tentativa 5 falhou com erro: 404,2025-08-23 13:56:31
+Erro,API Selic do BCB na tentativa 1 falhou com erro: 404,2025-08-23 13:57:36
+Erro,API Selic do BCB na tentativa 2 falhou com erro: 404,2025-08-23 13:57:37
+Erro,API Selic do BCB na tentativa 3 falhou com erro: 404,2025-08-23 13:57:38
+Erro,API Selic do BCB na tentativa 4 falhou com erro: 404,2025-08-23 13:57:39
+Erro,API Selic do BCB na tentativa 5 falhou com erro: 404,2025-08-23 13:57:40
+Sucesso,Realizado conexão com API Selic do BCB com sucesso,2025-08-23 14:00:56
+Sucesso,Importacao dos dados da API Selic do BCB executada com sucesso,2025-08-23 14:28:06
+Erro,API Selic do BCB na tentativa 1 falhou com erro: 404,2025-08-23 14:28:58
+Erro,API Selic do BCB na tentativa 2 falhou com erro: 404,2025-08-23 14:29:08
+Erro,API Selic do BCB na tentativa 3 falhou com erro: 404,2025-08-23 14:29:18
+Erro,API Selic do BCB na tentativa 4 falhou com erro: 404,2025-08-23 14:29:28
+Erro,API Selic do BCB na tentativa 5 falhou com erro: 404,2025-08-23 14:29:38
+Sucesso,Importacao dos dados da API Selic do BCB executada com sucesso,2025-08-23 14:39:31
+Erro,API Selic do BCB na tentativa 1 falhou com erro: 404,2025-08-23 14:44:18
+Erro,API Selic do BCB na tentativa 2 falhou com erro: 404,2025-08-23 14:44:28
+Erro,API Selic do BCB na tentativa 3 falhou com erro: 404,2025-08-23 14:44:39
+Erro,API Selic do BCB na tentativa 4 falhou com erro: 404,2025-08-23 14:44:49
+Erro,API Selic do BCB na tentativa 5 falhou com erro: 404,2025-08-23 14:45:00
+Erro,API Selic do BCB falhou no tratamento de dados com erro: 'datad',2025-08-23 14:48:41
+Erro,API Selic do BCB falhou no tratamento de dados com erro: unsupported operand type(s) for +: 'NoneType' and 'str',2025-08-23 14:51:03
+Erro,API Selic do BCB falhou no tratamento de dados com erro: unsupported operand type(s) for +: 'NoneType' and 'str',2025-08-23 14:52:00
+Sucesso,Importacao dos dados da API Selic do BCB executada com sucesso,2025-08-23 14:54:31
+Erro,Tratamento dos dados curado NAO foi executado com erro unsupported operand type(s) for +: 'NoneType' and 'str',2025-08-23 14:54:32
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 14:58:42
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 14:59:13
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 15:00:39
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 15:02:42
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 15:02:55
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 16:54:17
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 16:56:11
+Sucesso,Concluída a atualização dos dados da taxa Selic de 23/08/2024 até 23/08/2025,2025-08-23 16:56:58
+Sucesso,Concluída a atualização dos dados da taxa Selic de 01/01/2024 até 31/12/2024,2025-08-23 18:19:20
+Erro,Tratamento dos dados curados falhou com erro cannot access local variable 'key' where it is not associated with a value,2025-08-23 18:19:20
+Sucesso,Concluída a atualização dos dados da taxa Selic de 01/01/2024 até 31/12/2024,2025-08-23 18:19:39
+Erro,Tratamento dos dados curados falhou com erro cannot access local variable 'key' where it is not associated with a value,2025-08-23 18:19:39
+Sucesso,Concluída a atualização dos dados da taxa Selic de 01/01/2024 até 31/12/2024,2025-08-23 18:21:06
+Erro,Tratamento dos dados curados falhou com erro cannot access local variable 'key' where it is not associated with a value,2025-08-23 18:21:06
+Sucesso,Concluída a atualização dos dados da taxa Selic de 01/01/2024 até 31/12/2024,2025-08-23 18:22:37
+Sucesso,Concluída a atualização dos dados de cotação do dolar de 2024-01-01 até 2024-12-31,2025-08-23 18:22:39
+Sucesso,Concluída a atualização das bases bruto e curado,2025-08-23 18:22:39

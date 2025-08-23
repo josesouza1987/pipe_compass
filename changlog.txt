@@ -1,6 +1,12 @@
 # ---------------------------------- CHANGELOG ------------------------------------- #
-# Versão atual: 1.2
+# Versão atual: 1.3
 # ================================================================================== #
+
+# ---------- 1.3 [23/08/2025]
+- Criado arquivo de python func_aux.py pra separar todas as funções auxiliares
+- Desenvolvido função pra realizar log de erros e sucessos dos pipelines
+- Desenvolvido condição pra realizar 5 tentativas de conexão nas APIS a cada 10 segundos
+- Atualização da documentação
 
 # ---------- 1.2 [22/08/2025]
 - Desenvolvdo função de faz as transformações em dados curados e realiza persistência dos dados em formato parquet

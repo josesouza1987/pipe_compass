@@ -9,8 +9,8 @@
 
 # ========== Variáveis de Identificação =========
 nome = 'pipe_compass'
-versao = '1.2'
-data = '2025-08-22'
+versao = '1.3'
+data = '2025-08-23'
 
 # ========== Importações ============
 import sys
