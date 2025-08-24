@@ -9,8 +9,8 @@
 
 # ========== Variáveis de Identificação =========
 nome = 'pipe_compass'
-versao = '1.3'
-data = '2025-08-23'
+versao = '1.4'
+data = '2025-08-24'
 
 # ========== Importações ============
 import sys
@@ -25,7 +25,7 @@ if len(sys.argv) < 2:
     print("==============================================\n")
 
     print("Uso:")
-    print("  python pipe_compass.py -[opção] [extra1] [extra1]\n")
+    print("  python pipe_compass.py -[opção] [extra1] [extra2]\n")
     
     print("Opções:")
     print("  -u updategeral        Atualizar todos os dados brutos e curados")
