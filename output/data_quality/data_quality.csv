@@ -1,0 +1,3 @@
+API,total_registros,data_inicial,data_final,datas_faltantes,duplicatas,nulos_data,nulos_valor,valores_negativos,min_valor,max_valor,media_valor
+API SELIC,161,2025-01-02,2025-08-22,72,0,0,0,0,12.149954341558988,14.899981434569277,14.00398894228217
+API USD/BRL,234,2025-01-01,2025-08-22,0,0,0,0,0,5.392698,6.301501,5.704450679487181

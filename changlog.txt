@@ -1,6 +1,10 @@
 # ---------------------------------- CHANGELOG ------------------------------------- #
-# Versão atual: 1.3
+# Versão atual: 1.4
 # ================================================================================== #
+
+# ---------- 1.4 [24/08/2025]
+- Realizado ajustes no relatório de data quality e persistindo o resultado em arquivo CSV
+- Realizado ajustes na documentação do arquivo README.md
 
 # ---------- 1.3 [23/08/2025]
 - Criado arquivo de python func_aux.py pra separar todas as funções auxiliares

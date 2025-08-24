@@ -31,6 +31,8 @@ Este arquivo possui a documentação do sistema de pipeline de estudo da Fast Tr
 └─── output                                         : Todos arquivos de bases de dados exportadas
     │   curado                                      : Pasta contendo arquivos de base de dados com alto nível de tratamento prontos para uso
     │   dados_bruto                                 : Pasta contendo arquivos de base de dados brutos com nenhuma ou poucas transformações
+    │   data_quality                                : Pasta contendo arquivo Data Quality
+        └───data_quality.csv                        : Arquivo Data Quality
     └───logs                                        : Pasta contendo arquivo com logs
         └───logs_pipelie.csv                        : Arquivo de logs de sucesso e erros da execução do programa
 │
@@ -82,9 +84,9 @@ Ações:
 ```
 
 # Publicando uma nova versão
-Sempre que for desenvolver alguma nova função ou correção de erros, é necessário criar uma nova branch no repositório para tal.  
-Após o desenvolvimento, deverá ser aberto um pull request e feito o merge com a branch principal.  
-O changelog e o número da versão com a data no arquivo pipe_compass.py devem ser preenchidos.
+- Sempre que for desenvolver alguma nova função ou correção de erros, é necessário criar uma nova branch no repositório para tal.  
+- Após o desenvolvimento, deverá ser aberto um pull request e feito o merge com a branch principal.  
+- O changelog e o número da versão com a data no arquivo pipe_compass.py devem ser preenchidos.
 
 # Execução do programa
 Abra um terminal do sistema operacional e digite python %pipe%
@@ -98,45 +100,45 @@ Regras de conexão: havendo erro na conexão de cada API se repetirá a cada 10 
 1. API taxa de juros Selic:
 Objetivo: Obter os valores diários da taxa Selic, que é a taxa básica de juros da economia brasileira.
 
-Documentação: https://dadosabertos.bcb.gov.br/dataset/11-taxa-de-juros---selic/resource/b73edc07-bbac-430c-a2cb-b1639e605fa8
-Url: https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados
+Documentação: https://dadosabertos.bcb.gov.br/dataset/11-taxa-de-juros---selic/resource/b73edc07-bbac-430c-a2cb-b1639e605fa8.
+Url: https://api.bcb.gov.br/dados/serie/bcdata.sgs.11/dados.
 Autenticação: Não é necessária
-Paginação: Não é necessário
+Paginação: Não é necessário.
 
-Parâmetros: 
-dataInicial = DD/MM/YYYY
-dataFinal   = DD/MM/YYYY
+Parâmetros:  
+dataInicial = DD/MM/YYYY  
+dataFinal   = DD/MM/YYYY  
 
-Limitações: A diferença entre dataInicial e dataFinal não deve ser superior a 10 anos
+Limitações: A diferença entre dataInicial e dataFinal não deve ser superior a 10 anos.
 
-Obs1.: para esse projeto está sendo utilizado dados históricos e dinamicos de -1 ano até a data atual.
+Obs1.: para esse projeto está sendo utilizado dados históricos e dinamicos de -1 ano até a data atual.  
 Obs2.: é necessário realizar a multiplicação de 252 (dias de negociação) para dados relacionados ao mercado conforme a fonte: https://www.investopedia.com/terms/a/annualize.asp
 
-2. API exchangerate.host de cotação do Dolar:
-Objetivo: Obter cotações diárias do dólar em relação ao real (USD/BRL).
+2. API exchangerate.host de cotação do Dolar:  
+Objetivo: Obter cotações diárias do dólar em relação ao real (USD/BRL).  
 
-Documentação: https://exchangerate.host/documentation
-Url: https://api.exchangerate.host/timeframe
+Documentação: https://exchangerate.host/documentation  
+Url: https://api.exchangerate.host/timeframe  
 Autenticação: deve passar a chave no parâmetro access_key o qual é fornecido ao realizar cadastro no site
-Paginação: Não é necessário
+Paginação: Não é necessário  
 
-Parâmetros: 
-access_key = SUA_CHAVE
-start_date = YYYY-MM-DD
-end_date = YYYY-MM-DD
-source = USD
-currencies = BRL
+Parâmetros:   
+access_key = SUA_CHAVE  
+start_date = YYYY-MM-DD  
+end_date = YYYY-MM-DD  
+source = USD  
+currencies = BRL  
 
-Limitações: A diferença entre start_date e end_date não deve ser superior a 365 dias
+Limitações: A diferença entre start_date e end_date não deve ser superior a 365 dias.  
 
-Obs1.: para esse projeto está sendo utilizado dados históricos e dinamicos de -1 ano até a data atual.
-Obs2.: o site fornece API grátis mas com limitação de não exceder 100 requisições no mês vigente.
+Obs1.: para esse projeto está sendo utilizado dados históricos e dinamicos de -1 ano até a data atual.  
+Obs2.: o site fornece API grátis mas com limitação de não exceder 100 requisições no mês vigente.  
 
 # Explicação técnica da persistência
-Formato escolhido: Utilizando .parquet que utiliza compactação a nível de colunas.
+Formato escolhido: Utilizando .parquet que utiliza compactação a nível de colunas.   
 
-Particionamento: Está sendo particionado por colunas temporais com pastas nomeadas com ano(ex.: year-2025) e arquivos nomeados com número do mês(ex.: month-08.parquet).
+Particionamento: Está sendo particionado por colunas temporais com pastas nomeadas com ano(ex.: year-2025) e arquivos nomeados com número do mês(ex.: month-08.parquet).  
 
-Estrutura de pastas raízes: 
-dados_bruto                                   : São dados brutos mas com tratamentos necessários
-curados                                       : São arquivos com tratamentos/junções necessárias e prontos para consumo final
+Estrutura de pastas raízes:  
+dados_bruto                                   : São dados brutos mas com tratamentos necessários  
+curados                                       : São arquivos com tratamentos/junções necessárias e prontos para consumo final  
