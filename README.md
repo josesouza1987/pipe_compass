@@ -11,6 +11,7 @@ Este arquivo possui a documentação do sistema de pipeline de estudo da Fast Tr
 7. [Execução do programa](#execução-do-programa)
 8. [Informações sobre as APIs utilizadas no projeto](#informações-sobre-as-apis-utilizadas-no-projeto)
 9. [Explicação técnica da persistência](#explicação-técnica-da-persistência)
+10. [Configuração arquivo de relatório do Power BI](#Configuração-arquivo-de-relatório-do-Power-BI)  
 
 # Estrutura
 ```
@@ -142,3 +143,8 @@ Particionamento: Está sendo particionado por colunas temporais com pastas nomea
 Estrutura de pastas raízes:  
 dados_bruto                                   : São dados brutos mas com tratamentos necessários  
 curados                                       : São arquivos com tratamentos/junções necessárias e prontos para consumo final  
+
+# Configuração arquivo de relatório do Power BI
+No arquivo Power BI é necessário alterar a variável com o caminho da pasta onde contém os arquivos de saída dos arquivos .parquet e logs em CSV.  
+
+- Clique em **Transformar dados** e altere o parâmetro CaminhoPasta apontando para o arquivo "C:\caminho_de_pasta\output"
